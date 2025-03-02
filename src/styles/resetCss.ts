@@ -139,14 +139,4 @@ export const resetCSS = () => css`
   input {
     outline: 0;
   }
-
-  /* #mobile-view-container {
-    position: relative;
-    max-width: 475px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    border: 1px solid #e7e7e7;
-  } */
 `;

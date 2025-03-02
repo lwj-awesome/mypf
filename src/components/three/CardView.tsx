@@ -40,6 +40,7 @@ const Card: React.FC<CardProps> = ({ width, height, color, radius }) => {
         side={THREE.DoubleSide}
         metalness={0.7}
         roughness={0.3}
+        color={color}
         alphaMap={particleTexture}
         map={particleTexture}
       />
@@ -47,12 +48,12 @@ const Card: React.FC<CardProps> = ({ width, height, color, radius }) => {
   );
 };
 
-const CardView = ({ color = "white" }: { color: string }) => {
+const CardView = ({ color }: { color: string }) => {
   return (
     <Canvas camera={{ position: [0, 0, 5] }}>
-      <ambientLight intensity={2} />
+      <ambientLight intensity={3} />
       <directionalLight position={[1, 1, 1]} />
-      <Card width={3} height={5} radius={0.5} color={color} />
+      <Card width={3} height={4} radius={0.5} color={color} />
       <OrbitControls
         autoRotate
         autoRotateSpeed={2}
