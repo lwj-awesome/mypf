@@ -2,26 +2,54 @@ import { useEffect, useRef, useState } from "react";
 import { useGLTF, useFBX } from "@react-three/drei";
 import * as THREE from "three";
 import { Canvas } from "@react-three/fiber";
+import { useIndexContext } from "../../context/IndexProvider";
+import { useNavigate } from "react-router-dom";
+import { indexRoute } from "../../constants";
 
 const Character = () => {
   const glb = useGLTF("/character.glb");
-
   const dance = useFBX("/houseDancing.fbx");
   const pushButton = useFBX("/buttonPushing.fbx");
 
   const mixer = useRef<THREE.AnimationMixer | null>(null);
-
   const [currentAction, setCurrentAction] =
     useState<THREE.AnimationAction | null>(null);
 
+  const { selectedIndex, setSelectedIndex } = useIndexContext();
+  const navigate = useNavigate();
   const animations = [dance.animations[0], pushButton.animations[0]];
+
+  const playAnimation = (index: number) => {
+    if (!mixer.current || !animations[index]) return;
+    const newAction = mixer.current.clipAction(animations[index]);
+    if (currentAction) {
+      currentAction.fadeOut(0.5);
+    }
+    newAction.reset().fadeIn(1).play();
+    newAction.setEffectiveWeight(1.0);
+    newAction.setEffectiveTimeScale(1.0);
+
+    if (index === 0) {
+      newAction.setLoop(THREE.LoopRepeat, Infinity);
+    } else {
+      newAction.setLoop(THREE.LoopOnce, 1);
+      newAction.clampWhenFinished = true;
+    }
+    setCurrentAction(newAction);
+    mixer.current.addEventListener("finished", (e) => {
+      if (e.action === newAction && selectedIndex) {
+        console.log("애니메이션 종료");
+        if (!indexRoute[selectedIndex - 1]) return;
+        navigate(`/${indexRoute[selectedIndex - 1]}`);
+        setSelectedIndex(null);
+      }
+    });
+  };
 
   useEffect(() => {
     if (!glb.scene || animations.length === 0) return;
-
     mixer.current = new THREE.AnimationMixer(glb.scene);
     playAnimation(0);
-
     return () => {
       mixer.current?.stopAllAction();
     };
@@ -29,7 +57,6 @@ const Character = () => {
 
   useEffect(() => {
     const clock = new THREE.Clock();
-
     const animate = () => {
       requestAnimationFrame(animate);
       if (mixer.current) mixer.current.update(clock.getDelta());
@@ -38,34 +65,12 @@ const Character = () => {
     animate();
   }, []);
 
-  const playAnimation = (index: number) => {
-    if (!mixer.current || !animations[index]) return;
+  useEffect(() => {
+    if (selectedIndex === null) return;
+    playAnimation(1);
+  }, [selectedIndex]);
 
-    const newAction = mixer.current.clipAction(animations[index]);
-
-    if (currentAction) {
-      currentAction.fadeOut(0.5);
-    }
-
-    newAction.reset().fadeIn(1).play();
-    newAction.setEffectiveWeight(1.0);
-    newAction.setEffectiveTimeScale(1.0);
-
-    setCurrentAction(newAction);
-  };
-
-  const handleClick = () => {
-    const nextIndex =
-      (animations.indexOf(currentAction?.getClip() ?? animations[0]) + 1) %
-      animations.length;
-    playAnimation(nextIndex);
-  };
-
-  return (
-    <group onPointerDown={handleClick}>
-      <primitive object={glb.scene} scale={6} position={[0, -5, 0]} />
-    </group>
-  );
+  return <primitive object={glb.scene} scale={6} position={[0, -5, 0]} />;
 };
 
 const CharacterViewer = () => {

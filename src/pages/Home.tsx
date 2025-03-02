@@ -3,6 +3,7 @@ import { css } from "@emotion/react";
 import { useState, useRef, useEffect } from "react";
 import CharacterViewer from "../components/three/CharacterViewer";
 import CardView from "../components/three/CardView";
+import { useIndexContext } from "../context/IndexProvider";
 
 const containerStyle = css`
   display: flex;
@@ -26,6 +27,7 @@ const cardStyle = css`
   width: 150px;
   height: 200px;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   cursor: pointer;
@@ -33,7 +35,7 @@ const cardStyle = css`
   position: relative;
 `;
 
-export default function Home(): JSX.Element {
+const Home = (): JSX.Element => {
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
   const characterRef = useRef<HTMLDivElement | null>(null);
@@ -55,35 +57,32 @@ export default function Home(): JSX.Element {
     }
   }, []);
 
+  const { setSelectedIndex } = useIndexContext();
+
+  const color = ["white", "red", "blue", "yellow", "green"];
   const handleCardClick = (index: number) => {
     setSelectedId(selectedId === index ? null : index);
+    setSelectedIndex(index + 1);
   };
-
-  const test = ["white", "red", "blue", "yellow", "green"];
 
   return (
     <div css={containerStyle}>
       <div ref={characterRef} className="character-style">
         <CharacterViewer />
       </div>
-
       <div css={cardContainerStyle}>
         {Array.from({ length: 5 }).map((_, index) => {
           const isSelected = selectedId === index;
           const initialPosition = cardPositions[index] || { x: 0, y: 0 };
-
           let centerX = initialPosition.x;
           let centerY = initialPosition.y;
-
           if (characterRef.current) {
             const charRect = characterRef.current.getBoundingClientRect();
-
+            centerX = charRect.left + charRect.width / 2 - 75;
             centerY = charRect.top + 150;
           }
-
           const translateX = isSelected ? centerX - initialPosition.x : 0;
           const translateY = isSelected ? centerY - initialPosition.y : 0;
-
           return (
             <div
               key={index}
@@ -98,11 +97,13 @@ export default function Home(): JSX.Element {
               ]}
               onClick={() => handleCardClick(index)}
             >
-              <CardView color={test[index]} />
+              <CardView color={color[index]} />
             </div>
           );
         })}
       </div>
     </div>
   );
-}
+};
+
+export default Home;
