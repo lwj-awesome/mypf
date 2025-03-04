@@ -3,7 +3,7 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { useTexture } from "@react-three/drei";
 import * as THREE from "three";
 
-const Stars = (): JSX.Element => {
+const Stars = () => {
   const particleTexture = useTexture("/reactLogo.ico");
 
   const ref = useRef<THREE.Points>(null);

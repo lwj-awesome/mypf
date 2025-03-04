@@ -59,7 +59,6 @@ const Home = (): JSX.Element => {
 
   const { setSelectedIndex } = useIndexContext();
 
-  const color = ["white", "red", "blue", "yellow", "green"];
   const handleCardClick = (index: number) => {
     setSelectedId(selectedId === index ? null : index);
     setSelectedIndex(index + 1);
@@ -71,7 +70,7 @@ const Home = (): JSX.Element => {
         <CharacterViewer />
       </div>
       <div css={cardContainerStyle}>
-        {Array.from({ length: 5 }).map((_, index) => {
+        {Array.from({ length: 3 }).map((_, index) => {
           const isSelected = selectedId === index;
           const initialPosition = cardPositions[index] || { x: 0, y: 0 };
           let centerX = initialPosition.x;
@@ -97,7 +96,7 @@ const Home = (): JSX.Element => {
               ]}
               onClick={() => handleCardClick(index)}
             >
-              <CardView color={color[index]} />
+              <CardView cardIndex={index} />
             </div>
           );
         })}
